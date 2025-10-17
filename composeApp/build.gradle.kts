@@ -56,6 +56,7 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             api(libs.koin.core)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

@@ -1,5 +1,6 @@
 package shub39.icey.game
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import icecream.composeapp.generated.resources.Res
+import icecream.composeapp.generated.resources.ice_village
+import org.jetbrains.compose.resources.painterResource
 
 // Just to visualize the logic for now...
 @Composable
@@ -21,6 +26,13 @@ fun GameScreen(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
+        Image(
+            painter = painterResource(Res.drawable.ice_village),
+            contentDescription = "Ice Village",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+
         Card {
             Text(
                 text = "Round ${state.roundCounter}"
