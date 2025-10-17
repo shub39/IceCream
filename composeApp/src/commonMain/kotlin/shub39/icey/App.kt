@@ -7,12 +7,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
+import shub39.icey.core.presentation.provideColorScheme
+import shub39.icey.core.presentation.provideTypography
 import shub39.icey.game.GameScreen
 import shub39.icey.viewmodels.GameViewModel
 
 @Composable
 fun App() {
-    MaterialTheme {
+    MaterialTheme(
+        typography = provideTypography(),
+        colorScheme = provideColorScheme()
+    ) {
         val viewModel = koinViewModel<GameViewModel>()
         val state by viewModel.state.collectAsStateWithLifecycle()
 

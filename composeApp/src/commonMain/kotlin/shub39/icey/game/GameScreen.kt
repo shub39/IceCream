@@ -1,10 +1,10 @@
 package shub39.icey.game
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,7 +21,7 @@ fun GameScreen(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Column {
+        Card {
             Text(
                 text = "Round ${state.roundCounter}"
             )
@@ -64,8 +64,12 @@ fun GameScreen(
             Row {
                 state.playerItems.forEach { item ->
                     Button(
-                        onClick = {},
-                        enabled = state.gamePhase == GamePhase.PlayerTurn
+                        onClick = { onAction(GameAction.OnUseItem(item)) },
+                        enabled = if (item != Item.HandCuff) {
+                            state.gamePhase == GamePhase.PlayerTurn
+                        } else {
+                            state.gamePhase == GamePhase.PlayerTurn && state.skipTurn == null
+                        }
                     ) {
                         Text(text = item.name)
                     }

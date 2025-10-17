@@ -57,18 +57,22 @@ class GameViewModel(
                         }
 
                         ShellType.Live -> {
+                            val handsawDamage = if (_state.value.doubleDamage) 1 else 0
+
                             when (action.playerType) {
                                 PlayerType.Player -> {
                                     _state.update {
                                         it.copy(
-                                            playerHealth = it.playerHealth - 1
+                                            playerHealth = it.playerHealth - 1 - handsawDamage,
+                                            doubleDamage = false
                                         )
                                     }
                                 }
                                 PlayerType.Ai -> {
                                     _state.update {
                                         it.copy(
-                                            aiHealth = it.aiHealth - 1
+                                            aiHealth = it.aiHealth - 1 - handsawDamage,
+                                            doubleDamage = false
                                         )
                                     }
                                 }
@@ -86,6 +90,24 @@ class GameViewModel(
                     }
 
                     if (_state.value.gamePhase == GamePhase.AiTurn) {
+                        if (_state.value.skipTurn == PlayerType.Ai) {
+                            _state.update {
+                                it.copy(message = "Ai is handcuffed!")
+                            }
+
+                            delay(1000)
+
+                            _state.update {
+                                it.copy(
+                                    gamePhase = GamePhase.PlayerTurn,
+                                    skipTurn = null,
+                                    message = "Your Turn"
+                                )
+                            }
+
+                            return@launch
+                        }
+
                         _state.update { it.copy(message = "Ai's Turn") }
 
                         delay(1000)
@@ -124,14 +146,70 @@ class GameViewModel(
                             )
                         }
 
-                        if (_state.value.shells.isEmpty()) {
-                            loadShellsAndItems(_state.value.roundCounter + 1)
-                            return@launch
-                        }
+                        if (_state.value.shells.isEmpty()) loadShellsAndItems(_state.value.roundCounter + 1)
                     }
                 }
 
-                is GameAction.OnUseItem -> {}
+                is GameAction.OnUseItem -> {
+                    when (action.item) {
+                        Item.HandCuff -> {
+                            _state.update {
+                                it.copy(
+                                    skipTurn = PlayerType.Ai
+                                )
+                            }
+                        }
+
+                        Item.MagnifyingGlass -> {
+                            val nextShell = _state.value.shells.firstOrNull() ?: return@launch
+
+                            _state.update {
+                                it.copy(
+                                    message = "Next Shell is ${nextShell.name}"
+                                )
+                            }
+                        }
+
+                        Item.Cigarette -> {
+                            _state.update {
+                                it.copy(
+                                    playerHealth = it.playerHealth + 1
+                                )
+                            }
+                        }
+
+                        Item.Beer -> {
+                            val nextShell = _state.value.shells.firstOrNull() ?: return@launch
+
+                            _state.update {
+                                it.copy(
+                                    shells = it.shells.toMutableList().apply {
+                                        removeFirstOrNull()
+                                    }.toList(),
+                                    message = "Ejected a ${nextShell.name} Shell"
+                                )
+                            }
+                        }
+
+                        Item.HandSaw -> {
+                            _state.update {
+                                it.copy(
+                                    doubleDamage = true
+                                )
+                            }
+                        }
+                    }
+
+                    _state.update {
+                        it.copy(
+                            playerItems = it.playerItems.toMutableList().apply {
+                                remove(action.item)
+                            }.toList()
+                        )
+                    }
+
+                    if (_state.value.shells.isEmpty()) loadShellsAndItems(_state.value.roundCounter + 1)
+                }
 
                 GameAction.OnLoadShellsAndItems -> loadShellsAndItems()
 

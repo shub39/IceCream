@@ -8,7 +8,9 @@ data class GameState(
     val aiHealth: Int = 5,
     val playerItems: List<Item> = listOf(),
     val aiItems: List<Item> = listOf(),
-    val message: String? = null
+    val message: String? = null,
+    val skipTurn: PlayerType? = null,
+    val doubleDamage: Boolean = false
 )
 
 enum class PlayerType {
@@ -33,5 +35,6 @@ enum class Item {
     HandCuff,
     MagnifyingGlass,
     Cigarette,
-    Beer
+    Beer,
+    HandSaw
 }
