@@ -51,7 +51,8 @@ class GameViewModel(
                                     gamePhase = when(action.playerType) {
                                         PlayerType.Player -> GamePhase.PlayerTurn
                                         PlayerType.Ai -> GamePhase.AiTurn
-                                    }
+                                    },
+                                    doubleDamage = false
                                 )
                             }
                         }
