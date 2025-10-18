@@ -81,7 +81,9 @@ class GameViewModel(
 
                             if (isGameOver()) return@launch
 
-                            _state.update { it.copy(gamePhase = GamePhase.AiTurn) }
+                            _state.update {
+                                it.copy(gamePhase = GamePhase.AiTurn)
+                            }
                         }
                     }
 
@@ -91,7 +93,7 @@ class GameViewModel(
                     }
 
                     if (_state.value.gamePhase == GamePhase.AiTurn) {
-                        if (_state.value.skipTurn == PlayerType.Ai) {
+                        if (_state.value.skipAiTurn == 2) {
                             _state.update {
                                 it.copy(message = "Ai is handcuffed!")
                             }
@@ -101,7 +103,7 @@ class GameViewModel(
                             _state.update {
                                 it.copy(
                                     gamePhase = GamePhase.PlayerTurn,
-                                    skipTurn = null,
+                                    skipAiTurn = it.skipAiTurn - 1,
                                     message = "Your Turn"
                                 )
                             }
@@ -143,6 +145,7 @@ class GameViewModel(
                                     removeFirstOrNull()
                                 }.toList(),
                                 gamePhase = GamePhase.PlayerTurn,
+                                skipAiTurn = it.skipAiTurn - 1,
                                 message = "Your Turn"
                             )
                         }
@@ -153,15 +156,15 @@ class GameViewModel(
 
                 is GameAction.OnUseItem -> {
                     when (action.item) {
-                        Item.HandCuff -> {
+                        Item.Freeze -> {
                             _state.update {
                                 it.copy(
-                                    skipTurn = PlayerType.Ai
+                                    skipAiTurn = 2
                                 )
                             }
                         }
 
-                        Item.MagnifyingGlass -> {
+                        Item.Glass -> {
                             val nextShell = _state.value.shells.firstOrNull() ?: return@launch
 
                             _state.update {
@@ -171,7 +174,7 @@ class GameViewModel(
                             }
                         }
 
-                        Item.Cigarette -> {
+                        Item.Vanilla -> {
                             _state.update {
                                 it.copy(
                                     playerHealth = it.playerHealth + 1
@@ -179,7 +182,7 @@ class GameViewModel(
                             }
                         }
 
-                        Item.Beer -> {
+                        Item.Chocolate -> {
                             val nextShell = _state.value.shells.firstOrNull() ?: return@launch
 
                             _state.update {
@@ -192,7 +195,7 @@ class GameViewModel(
                             }
                         }
 
-                        Item.HandSaw -> {
+                        Item.Lemon -> {
                             _state.update {
                                 it.copy(
                                     doubleDamage = true
