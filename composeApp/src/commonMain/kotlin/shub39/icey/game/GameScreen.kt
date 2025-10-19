@@ -3,6 +3,7 @@ package shub39.icey.game
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
@@ -33,9 +35,11 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import shub39.icey.game.ui.components.HealthStats
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,7 +95,12 @@ fun GameScreen(
         }
 
         if (state.gamePhase != GamePhase.Idle) {
-            Card(shape = MaterialTheme.shapes.extraLarge) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -101,9 +110,10 @@ fun GameScreen(
                         .padding(16.dp)
                 ) {
                     Text(
-                        text = state.message ?: "...",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            textAlign = TextAlign.Center
+                        text = state.message?.let { stringResource(it) } ?: "...",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            textAlign = TextAlign.Center,
+                            fontWeight = Bold
                         )
                     )
 
@@ -115,13 +125,22 @@ fun GameScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(30.dp)
-                                        .background(
-                                            shape = CircleShape,
-                                            color = when (shell) {
-                                                ShellType.Blank -> MaterialTheme.colorScheme.primary
-                                                ShellType.Live -> MaterialTheme.colorScheme.background
+                                        .run {
+                                            when (shell) {
+                                                ShellType.Blank -> this
+                                                    .background(
+                                                        shape = CircleShape,
+                                                        color =  MaterialTheme.colorScheme.primary
+                                                    )
+                                                ShellType.Live -> this
+                                                    .border(
+                                                        shape = CircleShape,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        width = 1.dp
+                                                    )
                                             }
-                                        )
+                                        }
+
                                 )
                             }
                         }
@@ -153,12 +172,12 @@ fun GameScreen(
                                 Button(
                                     onClick = { onAction(GameAction.OnPlayerShoot(PlayerType.Ai)) }
                                 ) {
-                                    Text(text = "Shoot Ai")
+                                    Text(text = "Scoop Milky")
                                 }
                                 Button(
                                     onClick = { onAction(GameAction.OnPlayerShoot(PlayerType.Player)) }
                                 ) {
-                                    Text(text = "Shoot Yourself")
+                                    Text(text = "Scoop Yourself")
                                 }
                             }
                         }

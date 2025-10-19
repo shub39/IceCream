@@ -2,6 +2,21 @@ package shub39.icey.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import icecream.composeapp.generated.resources.Res
+import icecream.composeapp.generated.resources.defeat
+import icecream.composeapp.generated.resources.ejected_blank
+import icecream.composeapp.generated.resources.ejected_scoop
+import icecream.composeapp.generated.resources.milky_froozen
+import icecream.composeapp.generated.resources.milky_threw_blank_scoop
+import icecream.composeapp.generated.resources.milky_threw_scoop
+import icecream.composeapp.generated.resources.milkys_turn
+import icecream.composeapp.generated.resources.next_scoop_blank
+import icecream.composeapp.generated.resources.next_scoop_peak
+import icecream.composeapp.generated.resources.player_turn
+import icecream.composeapp.generated.resources.see_the_tray
+import icecream.composeapp.generated.resources.victory
+import icecream.composeapp.generated.resources.you_shot_milky
+import icecream.composeapp.generated.resources.you_shot_yourself
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,9 +33,9 @@ import shub39.icey.game.ShellType
 import kotlin.random.Random
 
 class GameViewModel(
-    private val statelayer: Statelayer
+    stateLayer: Statelayer
 ) : ViewModel() {
-    private val _state = statelayer.gameState
+    private val _state = stateLayer.gameState
     val state = _state.asStateFlow()
         .onStart { }
         .stateIn(
@@ -47,7 +62,7 @@ class GameViewModel(
                         ShellType.Blank -> {
                             _state.update {
                                 it.copy(
-                                    message = "Click!! shell was blank...",
+                                    message = Res.string.next_scoop_blank,
                                     gamePhase = when(action.playerType) {
                                         PlayerType.Player -> GamePhase.PlayerTurn
                                         PlayerType.Ai -> GamePhase.AiTurn
@@ -55,6 +70,8 @@ class GameViewModel(
                                     doubleDamage = false
                                 )
                             }
+
+                            delay(2000)
                         }
 
                         ShellType.Live -> {
@@ -65,7 +82,8 @@ class GameViewModel(
                                     _state.update {
                                         it.copy(
                                             playerHealth = it.playerHealth - 1 - handsawDamage,
-                                            doubleDamage = false
+                                            doubleDamage = false,
+                                            message = Res.string.you_shot_yourself
                                         )
                                     }
                                 }
@@ -73,11 +91,14 @@ class GameViewModel(
                                     _state.update {
                                         it.copy(
                                             aiHealth = it.aiHealth - 1 - handsawDamage,
-                                            doubleDamage = false
+                                            doubleDamage = false,
+                                            message = Res.string.you_shot_milky
                                         )
                                     }
                                 }
                             }
+
+                            delay(2000)
 
                             if (isGameOver()) return@launch
 
@@ -93,64 +114,7 @@ class GameViewModel(
                     }
 
                     if (_state.value.gamePhase == GamePhase.AiTurn) {
-                        if (_state.value.skipAiTurn == 2) {
-                            _state.update {
-                                it.copy(message = "Ai is handcuffed!")
-                            }
-
-                            delay(1000)
-
-                            _state.update {
-                                it.copy(
-                                    gamePhase = GamePhase.PlayerTurn,
-                                    skipAiTurn = it.skipAiTurn - 1,
-                                    message = "Your Turn"
-                                )
-                            }
-
-                            return@launch
-                        }
-
-                        _state.update { it.copy(message = "Ai's Turn") }
-
-                        delay(1000)
-
-                        val currentShell = _state.value.shells.firstOrNull() ?: return@launch
-
-                        when (currentShell) {
-                            ShellType.Blank -> {
-                                _state.update {
-                                    it.copy(
-                                        message = "Ai clicked!! shell was blank..."
-                                    )
-                                }
-                            }
-                            ShellType.Live -> {
-                                _state.update {
-                                    it.copy(
-                                        playerHealth = it.playerHealth - 1,
-                                        message = "You were shot!!"
-                                    )
-                                }
-                            }
-                        }
-
-                        delay(1000)
-
-                        if (isGameOver()) return@launch
-
-                        _state.update {
-                            it.copy(
-                                shells = it.shells.toMutableList().apply {
-                                    removeFirstOrNull()
-                                }.toList(),
-                                gamePhase = GamePhase.PlayerTurn,
-                                skipAiTurn = it.skipAiTurn - 1,
-                                message = "Your Turn"
-                            )
-                        }
-
-                        if (_state.value.shells.isEmpty()) loadShellsAndItems(_state.value.roundCounter + 1)
+                        handleAiTurn()
                     }
                 }
 
@@ -169,7 +133,10 @@ class GameViewModel(
 
                             _state.update {
                                 it.copy(
-                                    message = "Next Shell is ${nextShell.name}"
+                                    message = when (nextShell) {
+                                        ShellType.Blank -> Res.string.next_scoop_blank
+                                        ShellType.Live -> Res.string.next_scoop_peak
+                                    }
                                 )
                             }
                         }
@@ -190,7 +157,10 @@ class GameViewModel(
                                     shells = it.shells.toMutableList().apply {
                                         removeFirstOrNull()
                                     }.toList(),
-                                    message = "Ejected a ${nextShell.name} Shell"
+                                    message = when (nextShell) {
+                                        ShellType.Blank -> Res.string.ejected_blank
+                                        ShellType.Live -> Res.string.ejected_scoop
+                                    }
                                 )
                             }
                         }
@@ -222,13 +192,64 @@ class GameViewModel(
         }
     }
 
+    private suspend fun handleAiTurn() {
+        if (_state.value.skipAiTurn == 2) {
+            _state.update { it.copy(message = Res.string.milky_froozen) }
+            delay(2000)
+            _state.update {
+                it.copy(
+                    gamePhase = GamePhase.PlayerTurn,
+                    skipAiTurn = it.skipAiTurn - 1,
+                    message = Res.string.player_turn
+                )
+            }
+            return
+        }
+
+        _state.update { it.copy(message = Res.string.milkys_turn) }
+        delay(2000)
+
+        val currentShell = _state.value.shells.firstOrNull() ?: return
+
+        when (currentShell) {
+            ShellType.Blank -> {
+                _state.update { it.copy(message = Res.string.milky_threw_blank_scoop) }
+            }
+            ShellType.Live -> {
+                _state.update {
+                    it.copy(
+                        playerHealth = it.playerHealth - 1,
+                        message = Res.string.milky_threw_scoop
+                    )
+                }
+            }
+        }
+
+        delay(2000)
+
+        if (isGameOver()) return
+
+        _state.update {
+            it.copy(
+                shells = it.shells.drop(1),
+                gamePhase = GamePhase.PlayerTurn,
+                skipAiTurn = it.skipAiTurn - 1,
+                message = Res.string.player_turn
+            )
+        }
+
+        if (_state.value.shells.isEmpty()) {
+            loadShellsAndItems(_state.value.roundCounter + 1)
+        }
+    }
+
     private fun isGameOver(): Boolean {
         return when {
             _state.value.playerHealth <= 0 -> {
                 _state.update {
                     it.copy(
                         gamePhase = GamePhase.Defeat,
-                        message = "You Lost!"
+                        message = Res.string.defeat
                     )
                 }
 
@@ -239,7 +260,7 @@ class GameViewModel(
                 _state.update {
                     it.copy(
                         gamePhase = GamePhase.Victory,
-                        message = "You Won!"
+                        message = Res.string.victory
                     )
                 }
 
@@ -258,14 +279,15 @@ class GameViewModel(
                 add(0, ShellType.Live)
             }.toList().shuffled(Random)
         }
-        val blankShells = shells.count { it == ShellType.Blank }
-        val liveShells = shells.count { it == ShellType.Live }
 
         _state.update {
             it.copy(
                 shells = shells.shuffled(Random),
                 gamePhase = GamePhase.ShowShells,
-                message = "Live Shells: $liveShells, Blank Shells: $blankShells"
+                message = Res.string.see_the_tray,
+                skipAiTurn = 0,
+                skipPlayerTurn = 0,
+                doubleDamage = false,
             )
         }
 
@@ -279,7 +301,7 @@ class GameViewModel(
                 playerItems = playerItems,
                 aiItems = aiItems,
                 gamePhase = GamePhase.PlayerTurn,
-                message = "Your Turn",
+                message = Res.string.player_turn,
                 roundCounter = roundNo
             )
         }

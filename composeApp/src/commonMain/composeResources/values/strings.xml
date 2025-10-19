@@ -1,0 +1,16 @@
+<resources>
+    <string name="player_turn">Your Turn</string>
+    <string name="milkys_turn">Milky's Turn</string>
+    <string name="you_shot_yourself">You covered your own face with vanilla icecream</string>
+    <string name="you_shot_milky">You shot Milky's face with vanilla icecream</string>
+    <string name="next_scoop_peak">Next Scoop is...Vanilla!</string>
+    <string name="next_scoop_blank">Next Scoop is...well there is nothing here!</string>
+    <string name="ejected_scoop">Threw away a nice scoop of vanilla :(</string>
+    <string name="ejected_blank">Threw away a blank scoop...phew!</string>
+    <string name="milky_threw_blank_scoop">Milky threw...nothing</string>
+    <string name="see_the_tray">Have a look at the tray</string>
+    <string name="milky_threw_scoop">Milky threw a nice scoop of vanilla!!</string>
+    <string name="milky_froozen">Milky is FROZEN!</string>
+    <string name="defeat">You can't take it anymore</string>
+    <string name="victory">Milky can't take it anymore</string>
+</resources>
